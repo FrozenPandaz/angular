@@ -31,8 +31,32 @@ function _notImplemented(methodName: string) {
 /**
  * Parses a document string to a Document object.
  */
-export function parseDocument(html: string) {
-  return parse5.parse(html, {treeAdapter: parse5.treeAdapters.htmlparser2});
+export function parseDocument(html: string): Document {
+  const doc = parse5.parse(html, { treeAdapter: parse5.treeAdapters.htmlparser2 });
+  // Grab existing nodes or create new ones
+  const existingHeads = doc.getElementsByTagName('head');
+  const head = existingHeads[0] || doc.createElement('head');
+  const existingTitles = head.getElementsByTagName('title');
+  const title = existingTitles[0] || doc.createElement('title');
+  const existingBodies = doc.getElementsByTagName('body');
+  const body = existingBodies[0] || doc.createElement('body');
+
+  // Append the new node if it did not exist
+  if (!existingTitles[0]) {
+    head.appendChild(title);
+  }
+  if (!existingHeads[0]) {
+    doc.appendChild(head);
+  }
+  if (!existingBodies[0]) {
+    doc.appendChild(body);
+  }
+
+  // Set the nodes on the document object
+  doc['head'] = head;
+  doc['title'] = title;
+  doc['body'] = body;
+  return doc;
 }
 
 
@@ -492,8 +516,12 @@ export class Parse5DomAdapter extends DomAdapter {
     return newDoc;
   }
   getBoundingClientRect(el: any): any { return {left: 0, top: 0, width: 0, height: 0}; }
-  getTitle(doc: Document): string { return doc.title || ''; }
-  setTitle(doc: Document, newTitle: string) { doc.title = newTitle; }
+  getTitle(doc: Document): string {
+    return this.getText(doc.title) || '';
+  }
+  setTitle(doc: Document, newTitle: string) {
+    this.setText(doc.title, newTitle || '');
+  }
   isTemplateElement(el: any): boolean {
     return this.isElementNode(el) && this.tagName(el) === 'template';
   }
