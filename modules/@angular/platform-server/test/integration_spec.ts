@@ -162,7 +162,8 @@ export function main() {
          }]);
          platform.bootstrapModule(TitleAppModule).then(ref => {
            const state = ref.injector.get(PlatformState);
-           const title = getDOM().querySelector(state.getDocument(), 'title');
+           const doc = ref.injector.get(DOCUMENT);
+           const title = getDOM().querySelector(doc, 'title');
            expect(getDOM().getText(title)).toBe('Test App Title');
            expect(state.renderToString()).toContain('<title>Test App Title</title>');
          });
