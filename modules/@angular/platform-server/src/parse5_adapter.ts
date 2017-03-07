@@ -43,6 +43,7 @@ export function parseDocument(html: string): Document {
  * can introduce XSS risks.
  */
 export class Parse5DomAdapter extends DomAdapter {
+  private title: any;
   static makeCurrent() {
     treeAdapter = parse5.treeAdapters.htmlparser2;
     setRootDomAdapter(new Parse5DomAdapter());
@@ -594,14 +595,14 @@ export class Parse5DomAdapter extends DomAdapter {
   setCookie(name: string, value: string) { throw new Error('not implemented'); }
   animate(element: any, keyframes: any[], options: any): any { throw new Error('not implemented'); }
   private getTitleNode(doc: Document) {
-    let title = this.querySelector(doc, 'title');
+    this.title = this.title = this.querySelector(doc, 'title');
 
-    if (!title) {
-      title = <HTMLTitleElement>this.createElement('title');
-      this.appendChild(this.querySelector(doc, 'head'), title);
+    if (!this.title) {
+      this.title = <HTMLTitleElement>this.createElement('title');
+      this.appendChild(this.querySelector(doc, 'head'), this.title);
     }
 
-    return title;
+    return this.title;
   }
 }
 
