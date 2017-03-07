@@ -31,7 +31,7 @@ function _notImplemented(methodName: string) {
 /**
  * Parses a document string to a Document object.
  */
-export function parseDocument(html: string) {
+export function parseDocument(html: string): Document {
   return parse5.parse(html, {treeAdapter: parse5.treeAdapters.htmlparser2});
 }
 
@@ -44,6 +44,7 @@ export function parseDocument(html: string) {
  * can introduce XSS risks.
  */
 export class Parse5DomAdapter extends DomAdapter {
+  private title: HTMLTitleElement;
   static makeCurrent() {
     treeAdapter = parse5.treeAdapters.htmlparser2;
     setRootDomAdapter(new Parse5DomAdapter());
@@ -492,8 +493,10 @@ export class Parse5DomAdapter extends DomAdapter {
     return newDoc;
   }
   getBoundingClientRect(el: any): any { return {left: 0, top: 0, width: 0, height: 0}; }
-  getTitle(doc: Document): string { return doc.title || ''; }
-  setTitle(doc: Document, newTitle: string) { doc.title = newTitle; }
+  getTitle(doc: Document): string { return this.getText(this.getTitleNode(doc)) || ''; }
+  setTitle(doc: Document, newTitle: string) {
+    this.setText(this.getTitleNode(doc), newTitle || '');
+  }
   isTemplateElement(el: any): boolean {
     return this.isElementNode(el) && this.tagName(el) === 'template';
   }
@@ -592,6 +595,16 @@ export class Parse5DomAdapter extends DomAdapter {
   getCookie(name: string): string { throw new Error('not implemented'); }
   setCookie(name: string, value: string) { throw new Error('not implemented'); }
   animate(element: any, keyframes: any[], options: any): any { throw new Error('not implemented'); }
+  private getTitleNode(doc: Document) {
+    this.title = this.title || this.querySelector(doc, 'title');
+
+    if (!this.title) {
+      this.title = <HTMLTitleElement>this.createElement('title');
+      this.appendChild(this.querySelector(doc, 'head'), this.title);
+    }
+
+    return this.title;
+  }
 }
 
 // TODO: build a proper list, this one is all the keys of a HTMLInputElement
