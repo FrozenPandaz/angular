@@ -595,14 +595,14 @@ export class Parse5DomAdapter extends DomAdapter {
   setCookie(name: string, value: string) { throw new Error('not implemented'); }
   animate(element: any, keyframes: any[], options: any): any { throw new Error('not implemented'); }
   private getTitleNode(doc: Document) {
-    this.title = this.title || this.querySelector(doc, 'title');
+    let title = this.querySelector(doc, 'title');
 
-    if (!this.title) {
-      this.title = <HTMLTitleElement>this.createElement('title');
-      this.appendChild(this.querySelector(doc, 'head'), this.title);
+    if (!title) {
+      title = <HTMLTitleElement>this.createElement('title');
+      this.appendChild(this.querySelector(doc, 'head'), title);
     }
 
-    return this.title;
+    return title;
   }
 }
 
