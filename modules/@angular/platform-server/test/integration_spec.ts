@@ -43,14 +43,12 @@ class MyServerApp2 {
 class ExampleModule2 {
 }
 
-@Component({ selector: 'app', template: `` })
+@Component({selector: 'app', template: ``})
 class TitleApp {
-  constructor(private title: Title) {
-    this.title.setTitle('Test App Title');
-  }
+  constructor(private title: Title) { this.title.setTitle('Test App Title'); }
 }
 
-@NgModule({ declarations: [TitleApp], imports: [ServerModule], bootstrap: [TitleApp] })
+@NgModule({declarations: [TitleApp], imports: [ServerModule], bootstrap: [TitleApp]})
 class TitleAppModule {
 }
 
@@ -154,34 +152,34 @@ export function main() {
            expect(getDOM().getText(doc)).toEqual('Works too!');
            platform2.destroy();
          });
-      }));
+       }));
 
     it('adds title to the document', async(() => {
-        const platform = platformDynamicServer([{
-          provide: INITIAL_CONFIG,
-          useValue: { document: '<html><head></head><body><app></app></body></html>' }
-        }]);
-        platform.bootstrapModule(ExampleModule).then(ref => {
-          const doc = ref.injector.get(DOCUMENT);
-          getDOM().setTitle(doc, 'Test');
-          const title = getDOM().querySelector(doc, 'head title');
-          expect(title).toBeTruthy();
-          expect(getDOM().getText(title)).toBe('Test');
-        });
-    }));
+         const platform = platformDynamicServer([{
+           provide: INITIAL_CONFIG,
+           useValue: {document: '<html><head></head><body><app></app></body></html>'}
+         }]);
+         platform.bootstrapModule(ExampleModule).then(ref => {
+           const doc = ref.injector.get(DOCUMENT);
+           getDOM().setTitle(doc, 'Test');
+           const title = getDOM().querySelector(doc, 'head title');
+           expect(title).toBeTruthy();
+           expect(getDOM().getText(title)).toBe('Test');
+         });
+       }));
 
     it('adds title to the document', async(() => {
-        const platform = platformDynamicServer([{
-          provide: INITIAL_CONFIG,
-          useValue: { document: '<html><head></head><body><app></app></body></html>' }
-        }]);
-        platform.bootstrapModule(TitleAppModule).then(ref => {
-          const state = ref.injector.get(PlatformState);
-          const title = getDOM().querySelector(state.getDocument(), 'head title');
-          expect(getDOM().getText(title)).toBe('Test App Title');
-          expect(state.renderToString()).toContain('<title>Test App Title</title>');
-        });
-      }));
+         const platform = platformDynamicServer([{
+           provide: INITIAL_CONFIG,
+           useValue: {document: '<html><head></head><body><app></app></body></html>'}
+         }]);
+         platform.bootstrapModule(TitleAppModule).then(ref => {
+           const state = ref.injector.get(PlatformState);
+           const title = getDOM().querySelector(state.getDocument(), 'head title');
+           expect(getDOM().getText(title)).toBe('Test App Title');
+           expect(state.renderToString()).toContain('<title>Test App Title</title>');
+         });
+       }));
 
     it('adds styles with ng-transition attribute', async(() => {
          const platform = platformDynamicServer([{

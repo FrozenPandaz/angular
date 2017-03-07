@@ -32,30 +32,7 @@ function _notImplemented(methodName: string) {
  * Parses a document string to a Document object.
  */
 export function parseDocument(html: string): Document {
-  const doc = parse5.parse(html, { treeAdapter: parse5.treeAdapters.htmlparser2 });
-  // Grab existing nodes or create new ones
-  const existingHeads = doc.getElementsByTagName('head');
-  const head = existingHeads[0] || doc.createElement('head');
-  const existingTitles = head.getElementsByTagName('title');
-  const title = existingTitles[0] || doc.createElement('title');
-  const existingBodies = doc.getElementsByTagName('body');
-  const body = existingBodies[0] || doc.createElement('body');
-
-  // Append the new node if it did not exist
-  if (!existingTitles[0]) {
-    head.appendChild(title);
-  }
-  if (!existingHeads[0]) {
-    doc.appendChild(head);
-  }
-  if (!existingBodies[0]) {
-    doc.appendChild(body);
-  }
-
-  // Set the nodes on the document object
-  doc['head'] = head;
-  doc['title'] = title;
-  doc['body'] = body;
+  const doc: any = parse5.parse(html, {treeAdapter: parse5.treeAdapters.htmlparser2});
   return doc;
 }
 
@@ -68,6 +45,7 @@ export function parseDocument(html: string): Document {
  * can introduce XSS risks.
  */
 export class Parse5DomAdapter extends DomAdapter {
+  private title: HTMLTitleElement;
   static makeCurrent() {
     treeAdapter = parse5.treeAdapters.htmlparser2;
     setRootDomAdapter(new Parse5DomAdapter());
@@ -516,11 +494,9 @@ export class Parse5DomAdapter extends DomAdapter {
     return newDoc;
   }
   getBoundingClientRect(el: any): any { return {left: 0, top: 0, width: 0, height: 0}; }
-  getTitle(doc: Document): string {
-    return this.getText(doc.title) || '';
-  }
+  getTitle(doc: Document): string { return this.getText(this.getTitleNode(doc)) || ''; }
   setTitle(doc: Document, newTitle: string) {
-    this.setText(doc.title, newTitle || '');
+    this.setText(this.getTitleNode(doc), newTitle || '');
   }
   isTemplateElement(el: any): boolean {
     return this.isElementNode(el) && this.tagName(el) === 'template';
@@ -620,6 +596,16 @@ export class Parse5DomAdapter extends DomAdapter {
   getCookie(name: string): string { throw new Error('not implemented'); }
   setCookie(name: string, value: string) { throw new Error('not implemented'); }
   animate(element: any, keyframes: any[], options: any): any { throw new Error('not implemented'); }
+  private getTitleNode(doc: Document) {
+    this.title = this.title || this.querySelector(doc, 'head title');
+
+    if (!this.title) {
+      this.title = <HTMLTitleElement>this.createElement('title');
+      this.appendChild(this.querySelector(doc, 'head'), this.title);
+    }
+
+    return this.title;
+  }
 }
 
 // TODO: build a proper list, this one is all the keys of a HTMLInputElement
