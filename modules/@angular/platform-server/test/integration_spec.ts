@@ -158,7 +158,7 @@ export function main() {
     it('adds title to the document using Title service', async(() => {
          const platform = platformDynamicServer([{
            provide: INITIAL_CONFIG,
-           useValue: {document: '<html><head></head><body><app></app></body></html>'}
+           useValue: {document: '<html><head><title></title></head><body><app></app></body></html>'}
          }]);
          platform.bootstrapModule(TitleAppModule).then(ref => {
            const state = ref.injector.get(PlatformState);
