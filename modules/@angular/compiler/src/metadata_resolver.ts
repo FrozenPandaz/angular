@@ -6,8 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {Attribute, ChangeDetectionStrategy, Component, ComponentFactory, Directive, Host, Inject, Injectable, InjectionToken, ModuleWithProviders, Optional, Provider, Query, RendererTypeV2, SchemaMetadata, Self, SkipSelf, Type, resolveForwardRef, ɵERROR_COMPONENT_TYPE, ɵLIFECYCLE_HOOKS_VALUES, ɵReflectorReader, ɵccf as createComponentFactory, ɵreflector} from '@angular/core';
-
+import {Attribute, ChangeDetectionStrategy, Component, ComponentFactory, Directive, Host, Inject, Injectable, InjectionToken, ModuleWithProviders, Optional, Provider, Query, RendererTypeV2, SchemaMetadata, Self, SkipSelf, Type, resolveForwardRef, ɵERROR_COMPONENT_TYPE, ɵLIFECYCLE_HOOKS_VALUES, ɵReflectorReader, ɵccf as createComponentFactory, ɵreflector, ɵstringify as stringify} from '@angular/core';
 import {StaticSymbol, StaticSymbolCache} from './aot/static_symbol';
 import {ngfactoryFilePath} from './aot/util';
 import {assertArrayOfStrings, assertInterpolationSymbols} from './assertions';
@@ -15,7 +14,6 @@ import * as cpl from './compile_metadata';
 import {CompilerConfig} from './config';
 import {DirectiveNormalizer} from './directive_normalizer';
 import {DirectiveResolver} from './directive_resolver';
-import {stringify} from './facade/lang';
 import {Identifiers, resolveIdentifier} from './identifiers';
 import {CompilerInjectable} from './injectable';
 import {hasLifecycleHook} from './lifecycle_reflector';
@@ -427,6 +425,7 @@ export class CompileMetadataResolver {
         }
 
         if (importedModuleType) {
+          if (this._checkSelfImport(moduleType, importedModuleType)) return;
           const importedModuleSummary = this.getNgModuleSummary(importedModuleType);
           if (!importedModuleSummary) {
             this._reportError(
@@ -567,6 +566,15 @@ export class CompileMetadataResolver {
     transitiveModule.addModule(compileMeta.type);
     this._ngModuleCache.set(moduleType, compileMeta);
     return compileMeta;
+  }
+
+  private _checkSelfImport(moduleType: Type<any>, importedModuleType: Type<any>): boolean {
+    if (moduleType === importedModuleType) {
+      this._reportError(
+          syntaxError(`'${stringifyType(moduleType)}' module can't import itself`), moduleType);
+      return true;
+    }
+    return false;
   }
 
   private _getTypeDescriptor(type: Type<any>): string {

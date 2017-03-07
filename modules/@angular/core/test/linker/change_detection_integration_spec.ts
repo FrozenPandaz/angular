@@ -8,15 +8,13 @@
 
 import {ElementSchemaRegistry} from '@angular/compiler/src/schema/element_schema_registry';
 import {TEST_COMPILER_PROVIDERS} from '@angular/compiler/testing/test_bindings';
-import {AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, DebugElement, Directive, DoCheck, HostBinding, Inject, Injectable, Input, OnChanges, OnDestroy, OnInit, Output, Pipe, PipeTransform, RenderComponentType, Renderer, RendererFactoryV2, RootRenderer, SimpleChange, SimpleChanges, TemplateRef, Type, ViewChild, ViewContainerRef, WrappedValue} from '@angular/core';
+import {AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, DebugElement, Directive, DoCheck, EventEmitter, HostBinding, Inject, Injectable, Input, OnChanges, OnDestroy, OnInit, Output, Pipe, PipeTransform, RenderComponentType, Renderer, RendererFactoryV2, RootRenderer, SimpleChange, SimpleChanges, TemplateRef, Type, ViewChild, ViewContainerRef, WrappedValue} from '@angular/core';
 import {ComponentFixture, TestBed, fakeAsync} from '@angular/core/testing';
 import {By} from '@angular/platform-browser/src/dom/debug/by';
 import {getDOM} from '@angular/platform-browser/src/dom/dom_adapter';
 import {expect} from '@angular/platform-browser/testing/matchers';
-
 import {DomElementSchemaRegistry} from '../../../compiler/index';
 import {MockSchemaRegistry} from '../../../compiler/testing/index';
-import {EventEmitter} from '../../src/facade/async';
 
 export function main() {
   let elSchema: MockSchemaRegistry;
@@ -619,6 +617,14 @@ export function main() {
              ctx.componentInstance.a = 0;
              childEl.triggerEventHandler('event', 'EVENT');
              expect(ctx.componentInstance.a).toEqual(2);
+           }));
+
+        it('should support empty literals', fakeAsync(() => {
+             const ctx = _bindSimpleProp('(event)="a=[{},[]]"');
+             const childEl = ctx.debugElement.children[0];
+             childEl.triggerEventHandler('event', 'EVENT');
+
+             expect(ctx.componentInstance.a).toEqual([{}, []]);
            }));
 
         it('should throw when trying to assign to a local', fakeAsync(() => {

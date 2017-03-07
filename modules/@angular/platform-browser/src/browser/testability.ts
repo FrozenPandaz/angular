@@ -6,16 +6,15 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {GetTestability, Testability, TestabilityRegistry, setTestabilityGetter} from '@angular/core';
+import {GetTestability, Testability, TestabilityRegistry, setTestabilityGetter, ɵglobal as global} from '@angular/core';
 
 import {getDOM} from '../dom/dom_adapter';
-import {global, isPresent} from '../facade/lang';
 
 export class BrowserGetTestability implements GetTestability {
   static init() { setTestabilityGetter(new BrowserGetTestability()); }
 
   addToWindow(registry: TestabilityRegistry): void {
-    global.getAngularTestability = (elem: any, findInAncestors: boolean = true) => {
+    global['getAngularTestability'] = (elem: any, findInAncestors: boolean = true) => {
       const testability = registry.findTestabilityInTree(elem, findInAncestors);
       if (testability == null) {
         throw new Error('Could not find testability for element.');
@@ -23,12 +22,12 @@ export class BrowserGetTestability implements GetTestability {
       return testability;
     };
 
-    global.getAllAngularTestabilities = () => registry.getAllTestabilities();
+    global['getAllAngularTestabilities'] = () => registry.getAllTestabilities();
 
-    global.getAllAngularRootElements = () => registry.getAllRootElements();
+    global['getAllAngularRootElements'] = () => registry.getAllRootElements();
 
     const whenAllStable = (callback: any /** TODO #9100 */) => {
-      const testabilities = global.getAllAngularTestabilities();
+      const testabilities = global['getAllAngularTestabilities']();
       let count = testabilities.length;
       let didWork = false;
       const decrement = function(didWork_: any /** TODO #9100 */) {
@@ -55,7 +54,7 @@ export class BrowserGetTestability implements GetTestability {
       return null;
     }
     const t = registry.getTestability(elem);
-    if (isPresent(t)) {
+    if (t != null) {
       return t;
     } else if (!findInAncestors) {
       return null;

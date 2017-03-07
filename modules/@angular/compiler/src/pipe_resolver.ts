@@ -6,10 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {Pipe, Type, resolveForwardRef, ɵReflectorReader, ɵreflector} from '@angular/core';
-
-import {ListWrapper} from './facade/collection';
-import {stringify} from './facade/lang';
+import {Pipe, Type, resolveForwardRef, ɵReflectorReader, ɵreflector, ɵstringify as stringify} from '@angular/core';
+import {findLast} from './directive_resolver';
 import {CompilerInjectable} from './injectable';
 
 function _isPipeMetadata(type: any): boolean {
@@ -38,7 +36,7 @@ export class PipeResolver {
   resolve(type: Type<any>, throwIfNotFound = true): Pipe {
     const metas = this._reflector.annotations(resolveForwardRef(type));
     if (metas) {
-      const annotation = ListWrapper.findLast(metas, _isPipeMetadata);
+      const annotation = findLast(metas, _isPipeMetadata);
       if (annotation) {
         return annotation;
       }

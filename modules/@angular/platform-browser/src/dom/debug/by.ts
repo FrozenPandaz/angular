@@ -6,11 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {DebugElement, Type} from '@angular/core';
-
+import {DebugElement, Predicate, Type} from '@angular/core';
 import {getDOM} from '../../dom/dom_adapter';
-import {Predicate} from '../../facade/collection';
-import {isPresent} from '../../facade/lang';
 
 
 
@@ -38,7 +35,7 @@ export class By {
    */
   static css(selector: string): Predicate<DebugElement> {
     return (debugElement) => {
-      return isPresent(debugElement.nativeElement) ?
+      return debugElement.nativeElement != null ?
           getDOM().elementMatches(debugElement.nativeElement, selector) :
           false;
     };
