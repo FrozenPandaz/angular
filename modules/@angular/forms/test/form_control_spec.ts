@@ -6,12 +6,11 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
+import {EventEmitter} from '@angular/core';
 import {fakeAsync, tick} from '@angular/core/testing';
 import {AsyncTestCompleter, beforeEach, describe, inject, it} from '@angular/core/testing/testing_internal';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 
-import {EventEmitter} from '../src/facade/async';
-import {isPresent} from '../src/facade/lang';
 import {FormArray} from '../src/model';
 
 export function main() {
@@ -19,7 +18,7 @@ export function main() {
     return (c: FormControl) => {
       let resolve: (result: any) => void;
       const promise = new Promise(res => { resolve = res; });
-      const t = isPresent((timeouts as any)[c.value]) ? (timeouts as any)[c.value] : 0;
+      const t = (timeouts as any)[c.value] != null ? (timeouts as any)[c.value] : 0;
       const res = c.value != expected ? {'async': true} : null;
 
       if (t == 0) {

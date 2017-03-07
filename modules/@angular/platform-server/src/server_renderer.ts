@@ -7,10 +7,8 @@
  */
 
 import {DomElementSchemaRegistry} from '@angular/compiler';
-import {APP_ID, Inject, Injectable, NgZone, RenderComponentType, Renderer, RendererFactoryV2, RendererTypeV2, RendererV2, RootRenderer, ViewEncapsulation} from '@angular/core';
+import {APP_ID, Inject, Injectable, NgZone, RenderComponentType, Renderer, RendererFactoryV2, RendererTypeV2, RendererV2, RootRenderer, ViewEncapsulation, ɵstringify as stringify} from '@angular/core';
 import {DOCUMENT, ɵNAMESPACE_URIS as NAMESPACE_URIS, ɵSharedStylesHost as SharedStylesHost, ɵflattenStyles as flattenStyles, ɵgetDOM as getDOM, ɵshimContentAttribute as shimContentAttribute, ɵshimHostAttribute as shimHostAttribute} from '@angular/platform-browser';
-
-import {isBlank, isPresent, stringify} from './facade/lang';
 
 const EMPTY_ARRAY: any[] = [];
 
@@ -148,10 +146,11 @@ class DefaultServerRendererV2 implements RendererV2 {
   }
 
   setProperty(el: any, name: string, value: any): void {
+    checkNoSyntheticProp(name, 'property');
     getDOM().setProperty(el, name, value);
     // Mirror property values for known HTML element properties in the attributes.
     const tagName = (el.tagName as string).toLowerCase();
-    if (isPresent(value) && (typeof value === 'number' || typeof value == 'string') &&
+    if (value != null && (typeof value === 'number' || typeof value == 'string') &&
         this.schema.hasElement(tagName, EMPTY_ARRAY) &&
         this.schema.hasProperty(tagName, name, EMPTY_ARRAY) &&
         this._isSafeToReflectProperty(tagName, name)) {
@@ -166,10 +165,19 @@ class DefaultServerRendererV2 implements RendererV2 {
       callback: (event: any) => boolean): () => void {
     // Note: We are not using the EventsPlugin here as this is not needed
     // to run our tests.
+    checkNoSyntheticProp(eventName, 'listener');
     const el =
         typeof target === 'string' ? getDOM().getGlobalEventTarget(this.document, target) : target;
     const outsideHandler = (event: any) => this.ngZone.runGuarded(() => callback(event));
     return this.ngZone.runOutsideAngular(() => getDOM().onAndCancel(el, eventName, outsideHandler));
+  }
+}
+
+const AT_CHARCODE = '@'.charCodeAt(0);
+function checkNoSyntheticProp(name: string, nameKind: string) {
+  if (name.charCodeAt(0) === AT_CHARCODE) {
+    throw new Error(
+        `Found the synthetic ${nameKind} ${name}. Please include either "BrowserAnimationsModule" or "NoopAnimationsModule" in your application.`);
   }
 }
 

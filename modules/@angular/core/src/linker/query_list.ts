@@ -6,9 +6,11 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {EventEmitter, Observable} from '../facade/async';
-import {ListWrapper} from '../facade/collection';
-import {getSymbolIterator} from '../facade/lang';
+import {Observable} from 'rxjs/Observable';
+
+import {EventEmitter} from '../event_emitter';
+import {getSymbolIterator} from '../util';
+
 
 /**
  * An unmodifiable list of items that Angular keeps up to date when the state
@@ -92,7 +94,7 @@ export class QueryList<T>/* implements Iterable<T> */ {
   toString(): string { return this._results.toString(); }
 
   reset(res: Array<T|any[]>): void {
-    this._results = ListWrapper.flatten(res);
+    this._results = flatten(res);
     this._dirty = false;
   }
 
@@ -103,4 +105,11 @@ export class QueryList<T>/* implements Iterable<T> */ {
 
   /** internal */
   get dirty() { return this._dirty; }
+}
+
+function flatten<T>(list: Array<T|T[]>): T[] {
+  return list.reduce((flat: any[], item: T | T[]): T[] => {
+    const flatItem = Array.isArray(item) ? flatten(item) : item;
+    return (<T[]>flat).concat(flatItem);
+  }, []);
 }

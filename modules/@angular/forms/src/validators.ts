@@ -6,11 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {InjectionToken, ɵisPromise as isPromise} from '@angular/core';
+import {InjectionToken, ɵisPromise as isPromise, ɵmerge as merge} from '@angular/core';
 import {toPromise} from 'rxjs/operator/toPromise';
 import {AsyncValidatorFn, Validator, ValidatorFn} from './directives/validators';
-import {StringMapWrapper} from './facade/collection';
-import {isPresent} from './facade/lang';
 import {AbstractControl, FormControl, FormGroup} from './model';
 
 function isEmptyInputValue(value: any): boolean {
@@ -188,6 +186,10 @@ export class Validators {
   }
 }
 
+function isPresent(o: any): boolean {
+  return o != null;
+}
+
 function _convertToPromise(obj: any): Promise<any> {
   return isPromise(obj) ? obj : toPromise.call(obj);
 }
@@ -203,7 +205,7 @@ function _executeAsyncValidators(control: AbstractControl, validators: AsyncVali
 function _mergeErrors(arrayOfErrors: any[]): {[key: string]: any} {
   const res: {[key: string]: any} =
       arrayOfErrors.reduce((res: {[key: string]: any}, errors: {[key: string]: any}) => {
-        return isPresent(errors) ? StringMapWrapper.merge(res, errors) : res;
+        return errors != null ? merge(res, errors) : res;
       }, {});
   return Object.keys(res).length === 0 ? null : res;
 }

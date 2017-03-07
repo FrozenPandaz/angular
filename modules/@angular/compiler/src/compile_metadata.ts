@@ -6,11 +6,8 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {ChangeDetectionStrategy, ComponentFactory, RendererTypeV2, SchemaMetadata, Type, ViewEncapsulation, ɵLifecycleHooks, ɵreflector} from '@angular/core';
-
+import {ChangeDetectionStrategy, ComponentFactory, RendererTypeV2, SchemaMetadata, Type, ViewEncapsulation, ɵLifecycleHooks, ɵreflector, ɵstringify as stringify} from '@angular/core';
 import {StaticSymbol} from './aot/static_symbol';
-import {ListWrapper} from './facade/collection';
-import {isPresent, stringify} from './facade/lang';
 import {CssSelector} from './selector';
 import {splitAtColon} from './util';
 
@@ -181,12 +178,11 @@ export interface CompileFactoryMetadata extends CompileIdentifierMetadata {
 }
 
 export function tokenName(token: CompileTokenMetadata) {
-  return isPresent(token.value) ? _sanitizeIdentifier(token.value) :
-                                  identifierName(token.identifier);
+  return token.value != null ? _sanitizeIdentifier(token.value) : identifierName(token.identifier);
 }
 
 export function tokenReference(token: CompileTokenMetadata) {
-  if (isPresent(token.identifier)) {
+  if (token.identifier != null) {
     return token.identifier.reference;
   } else {
     return token.value;
@@ -272,7 +268,7 @@ export class CompileTemplateMetadata {
     this.styles = _normalizeArray(styles);
     this.styleUrls = _normalizeArray(styleUrls);
     this.externalStylesheets = _normalizeArray(externalStylesheets);
-    this.animations = animations ? ListWrapper.flatten(animations) : [];
+    this.animations = animations ? flatten(animations) : [];
     this.ngContentSelectors = ngContentSelectors || [];
     if (interpolation && interpolation.length != 2) {
       throw new Error(`'interpolation' should have a start and an end symbol.`);
@@ -348,21 +344,21 @@ export class CompileDirectiveMetadata {
     const hostListeners: {[key: string]: string} = {};
     const hostProperties: {[key: string]: string} = {};
     const hostAttributes: {[key: string]: string} = {};
-    if (isPresent(host)) {
+    if (host != null) {
       Object.keys(host).forEach(key => {
         const value = host[key];
         const matches = key.match(HOST_REG_EXP);
         if (matches === null) {
           hostAttributes[key] = value;
-        } else if (isPresent(matches[1])) {
+        } else if (matches[1] != null) {
           hostProperties[matches[1]] = value;
-        } else if (isPresent(matches[2])) {
+        } else if (matches[2] != null) {
           hostListeners[matches[2]] = value;
         }
       });
     }
     const inputsMap: {[key: string]: string} = {};
-    if (isPresent(inputs)) {
+    if (inputs != null) {
       inputs.forEach((bindConfig: string) => {
         // canonical syntax: `dirProp: elProp`
         // if there is no `:`, use dirProp = elProp
@@ -371,7 +367,7 @@ export class CompileDirectiveMetadata {
       });
     }
     const outputsMap: {[key: string]: string} = {};
-    if (isPresent(outputs)) {
+    if (outputs != null) {
       outputs.forEach((bindConfig: string) => {
         // canonical syntax: `dirProp: elProp`
         // if there is no `:`, use dirProp = elProp
@@ -734,4 +730,11 @@ export class ProviderMeta {
     this.dependencies = deps;
     this.multi = !!multi;
   }
+}
+
+export function flatten<T>(list: Array<T|T[]>): T[] {
+  return list.reduce((flat: any[], item: T | T[]): T[] => {
+    const flatItem = Array.isArray(item) ? flatten(item) : item;
+    return (<T[]>flat).concat(flatItem);
+  }, []);
 }

@@ -7,8 +7,6 @@
  */
 
 import {ResourceLoader} from '@angular/compiler';
-import {ListWrapper} from './facade/collection';
-import {isBlank} from './facade/lang';
 
 /**
  * A mock implementation of {@link ResourceLoader} that allows outgoing requests to be mocked
@@ -82,7 +80,7 @@ export class MockResourceLoader extends ResourceLoader {
     if (this._expectations.length > 0) {
       const expectation = this._expectations[0];
       if (expectation.url == url) {
-        ListWrapper.remove(this._expectations, expectation);
+        remove(this._expectations, expectation);
         request.complete(expectation.response);
         return;
       }
@@ -111,7 +109,7 @@ class _PendingRequest {
   }
 
   complete(response: string) {
-    if (isBlank(response)) {
+    if (response == null) {
       this.reject(`Failed to load ${this.url}`);
     } else {
       this.resolve(response);
@@ -127,5 +125,12 @@ class _Expectation {
   constructor(url: string, response: string) {
     this.url = url;
     this.response = response;
+  }
+}
+
+function remove<T>(list: T[], el: T): void {
+  const index = list.indexOf(el);
+  if (index > -1) {
+    list.splice(index, 1);
   }
 }

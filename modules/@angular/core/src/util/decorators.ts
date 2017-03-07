@@ -6,11 +6,11 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {global, stringify} from '../facade/lang';
 import {Type} from '../type';
+import {global, stringify} from '../util';
 
 let _nextClassId = 0;
-const Reflect = global.Reflect;
+const Reflect = global['Reflect'];
 
 /**
  * Declares the interface to be used with {@link Class}.

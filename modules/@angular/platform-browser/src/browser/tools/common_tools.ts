@@ -7,11 +7,8 @@
  */
 
 import {ApplicationRef, ComponentRef} from '@angular/core';
-
 import {getDOM} from '../../dom/dom_adapter';
-import {window} from '../../facade/browser';
-import {NumberWrapper, isPresent} from '../../facade/lang';
-
+import {window} from './browser';
 
 export class ChangeDetectionPerfRecord {
   constructor(public msPerTick: number, public numTicks: number) {}
@@ -47,7 +44,7 @@ export class AngularProfiler {
     const record = config && config['record'];
     const profileName = 'Change Detection';
     // Profiler is not available in Android browsers, nor in IE 9 without dev tools opened
-    const isProfilerAvailable = isPresent(window.console.profile);
+    const isProfilerAvailable = window.console.profile != null;
     if (record && isProfilerAvailable) {
       window.console.profile(profileName);
     }
